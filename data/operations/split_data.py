@@ -12,6 +12,8 @@ def split_data(data, target_column, ratio=[0.8, 0.1, 0.1]):
         The input data
     target_column : str
         The target column
+    ratio : list
+        A list of ratios to split the data into training, validation and testing sets
 
     Returns
     -------
