@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Metrics:
     """
     A class to calculate performance metrics
@@ -113,10 +114,12 @@ class Metrics:
         if type == "micro":
             precision = self.precision(y_true, y_pred, type)
             recall = self.recall(y_true, y_pred, type)
-            return (2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
+            return (
+                (2 * precision * recall / (precision + recall))
+                if (precision + recall) > 0
+                else 0.0
+            )
         elif type == "macro":
-            precision_list = []
-            recall_list = []
             f1_list = []
             for c in classes:
                 tp = np.sum((y_true == c) & (y_pred == c))
@@ -128,3 +131,57 @@ class Metrics:
             return np.mean(f1_list)
         else:
             raise ValueError("Invalid type")
+
+    def mean_squared_error(self, y_true, y_pred):
+        """
+        Calculate the mean squared error of the model
+
+        Parameters
+        ----------
+        y_true : numpy.ndarray
+            The true target values
+        y_pred : numpy.ndarray
+            The predicted target values
+
+        Returns
+        -------
+        float
+            The mean squared error of the model
+        """
+        return np.mean((y_true - y_pred) ** 2)
+
+    def standard_deviation(self, y_true, y_pred):
+        """
+        Calculate the standard deviation of the model
+
+        Parameters
+        ----------
+        y_true : numpy.ndarray
+            The true target values
+        y_pred : numpy.ndarray
+            The predicted target values
+
+        Returns
+        -------
+        float
+            The standard deviation of the model
+        """
+        return np.std(y_true - y_pred)
+
+    def variance(self, y_true, y_pred):
+        """
+        Calculate the variance of the model
+
+        Parameters
+        ----------
+        y_true : numpy.ndarray
+            The true target values
+        y_pred : numpy.ndarray
+            The predicted target values
+
+        Returns
+        -------
+        float
+            The variance of the model
+        """
+        return np.var(y_true - y_pred)
