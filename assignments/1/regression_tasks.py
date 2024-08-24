@@ -342,4 +342,4 @@ def animation_initialization_gif():
 # run_regularization_model(degree=2)
 # get_best_degree(learning_rate=0.01)
 # animation_gif()
-animation_initialization_gif()
+# animation_initialization_gif()

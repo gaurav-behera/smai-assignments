@@ -132,4 +132,4 @@ def compare():
 #     plt_title="L2 Regularization Plots",
 #     file_name="L2_regularization_results.json",
 # )
-compare()
+# compare()
