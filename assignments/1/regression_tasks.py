@@ -113,7 +113,7 @@ def get_best_learning_rate(degree):
     # print top 5 results
     print("Top 5 results")
     print(results_df.sort_values(by="Mean Square Error").head(5))
-    
+
     with open("learning_rate_results.json", "w") as f:
         json.dump(results, f)
 
@@ -179,7 +179,7 @@ def get_best_degree(learning_rate):
         # print top 5 results
         print("Top 5 results")
         print(results_df.sort_values(by="Mean Square Error").head(5))
-        
+
         with open(f"degree_results_{calc_type}.json", "w") as f:
             json.dump(results, f)
 
@@ -293,7 +293,7 @@ def make_gif_plots(deg, start_zero=False, start_one=False):
             }
         )
         plt.close(fig)
-        
+
         # break loop if mse or variance or standard deviation starts increasing
         if results[-1]["mse"] > results[-2]["mse"]:
             break
@@ -301,7 +301,6 @@ def make_gif_plots(deg, start_zero=False, start_one=False):
             break
         if results[-1]["var"] > results[-2]["var"]:
             break
-        
 
 
 def create_gif(deg, start_zero=False, start_one=False):
@@ -313,19 +312,22 @@ def create_gif(deg, start_zero=False, start_one=False):
     for i in range(len(os.listdir(f"frames-deg{deg}"))):
         img = Image.open(f"frames-deg{deg}/frame_{str(i + 1)}.png")
         img_array.append(img)
-    img_array[0].save(f"animation-deg{deg}.gif",
-               save_all=True,
-               append_images=img_array[1:],
-               duration=10,
-               loop=0,
-               optimize=True)
+    img_array[0].save(
+        f"animation-deg{deg}.gif",
+        save_all=True,
+        append_images=img_array[1:],
+        duration=10,
+        loop=0,
+        optimize=True,
+    )
     print("Gif created")
 
 
 def animation_gif():
-    for k in [1,2,5,17,21]:
+    for k in [1, 2, 5, 17, 21]:
         make_gif_plots(k)
         create_gif(k)
+
 
 def animation_initialization_gif():
     for k in [17]:
@@ -333,13 +335,19 @@ def animation_initialization_gif():
         create_gif(k, start_zero=True)
         make_gif_plots(k, start_one=True)
         create_gif(k, start_one=True)
-        
 
-# visualize_data()
-# run_regularization_model(degree=1)
-# get_best_learning_rate(degree=1)
-# plot_best_fit_line(degree=1, learning_rate=0.01)
-# run_regularization_model(degree=2)
-# get_best_degree(learning_rate=0.01)
-# animation_gif()
-# animation_initialization_gif()
+
+def run_all_regression():
+    visualize_data()
+    run_regularization_model(degree=1)
+    get_best_learning_rate(degree=1)
+    plot_best_fit_line(degree=1, learning_rate=0.01)
+    run_regularization_model(degree=2)
+    get_best_degree(learning_rate=0.01)
+    animation_gif()
+    animation_initialization_gif()
+
+
+if __name__ == "__main__":
+    # run_all_regression()
+    pass

@@ -277,12 +277,18 @@ def evaluate_spotify2_best():
     report_metrics(KNN(k, metric), k, metric)
 
 
-# report_metrics(KNN(28, "manhattan"), 7, "manhattan")
-# wandb_tune()
-# print_top_results()
-# plot_accuracy_graph()
-# best_features()
-# inferencetime_vs_model()
-# inferecetime_vs_trainsize()
-# evaluate_spotify2()
-# evaluate_spotify2_best()
+def run_all_knn():
+    report_metrics(KNN(28, "manhattan"), 7, "manhattan")
+    wandb_tune()
+    print_top_results()
+    plot_accuracy_graph()
+    best_features()
+    inferencetime_vs_model()
+    inferecetime_vs_trainsize()
+    evaluate_spotify2()
+    evaluate_spotify2_best()
+
+
+if __name__ == "__main__":
+    run_all_knn()
+    pass

@@ -77,6 +77,7 @@ def all_degree_plots(reg_lambda=0, reg_type="ridge", plt_title="", file_name="")
     with open(file_name, "w") as f:
         json.dump(results, f)
 
+
 def compare():
     # read json to df
     with open("no_regularization_results.json", "r") as f:
@@ -88,48 +89,134 @@ def compare():
     no_reg_df = pd.DataFrame(no_reg_results)
     l1_reg_df = pd.DataFrame(l1_reg_results)
     l2_reg_df = pd.DataFrame(l2_reg_results)
-    
+
     # plot the degree vs mse for the three regularization types
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=no_reg_df["degree"], y=no_reg_df["mse"], mode="lines", name="No Regularization"))
-    fig.add_trace(go.Scatter(x=l1_reg_df["degree"], y=l1_reg_df["mse"], mode="lines", name="L1 Regularization"))
-    fig.add_trace(go.Scatter(x=l2_reg_df["degree"], y=l2_reg_df["mse"], mode="lines", name="L2 Regularization"))
-    fig.update_layout(title="Degree vs MSE for the three regularization types", xaxis_title="Degree", yaxis_title="MSE", height=600, width=800)
+    fig.add_trace(
+        go.Scatter(
+            x=no_reg_df["degree"],
+            y=no_reg_df["mse"],
+            mode="lines",
+            name="No Regularization",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=l1_reg_df["degree"],
+            y=l1_reg_df["mse"],
+            mode="lines",
+            name="L1 Regularization",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=l2_reg_df["degree"],
+            y=l2_reg_df["mse"],
+            mode="lines",
+            name="L2 Regularization",
+        )
+    )
+    fig.update_layout(
+        title="Degree vs MSE for the three regularization types",
+        xaxis_title="Degree",
+        yaxis_title="MSE",
+        height=600,
+        width=800,
+    )
     fig.show()
-    
+
     # plot the degree vs std for the three regularization types
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=no_reg_df["degree"], y=no_reg_df["std"], mode="lines", name="No Regularization"))
-    fig.add_trace(go.Scatter(x=l1_reg_df["degree"], y=l1_reg_df["std"], mode="lines", name="L1 Regularization"))
-    fig.add_trace(go.Scatter(x=l2_reg_df["degree"], y=l2_reg_df["std"], mode="lines", name="L2 Regularization"))
-    fig.update_layout(title="Degree vs STD for the three regularization types", xaxis_title="Degree", yaxis_title="STD", height=600, width=800)
+    fig.add_trace(
+        go.Scatter(
+            x=no_reg_df["degree"],
+            y=no_reg_df["std"],
+            mode="lines",
+            name="No Regularization",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=l1_reg_df["degree"],
+            y=l1_reg_df["std"],
+            mode="lines",
+            name="L1 Regularization",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=l2_reg_df["degree"],
+            y=l2_reg_df["std"],
+            mode="lines",
+            name="L2 Regularization",
+        )
+    )
+    fig.update_layout(
+        title="Degree vs STD for the three regularization types",
+        xaxis_title="Degree",
+        yaxis_title="STD",
+        height=600,
+        width=800,
+    )
     fig.show()
-    
+
     # plot the degree vs var for the three regularization types
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=no_reg_df["degree"], y=no_reg_df["var"], mode="lines", name="No Regularization"))
-    fig.add_trace(go.Scatter(x=l1_reg_df["degree"], y=l1_reg_df["var"], mode="lines", name="L1 Regularization"))
-    fig.add_trace(go.Scatter(x=l2_reg_df["degree"], y=l2_reg_df["var"], mode="lines", name="L2 Regularization"))
-    fig.update_layout(title="Degree vs VAR for the three regularization types", xaxis_title="Degree", yaxis_title="VAR", height=600, width=800)
-    fig.show() 
-    
-    
-    
-# all_degree_plots(
-#     reg_lambda=0,
-#     plt_title="No Regularization Plots",
-#     file_name="no_regularization_results.json",
-# )
-# all_degree_plots(
-#     reg_lambda=1,
-#     reg_type="lasso",
-#     plt_title="L1 Regularization Plots",
-#     file_name="L1_regularization_results.json",
-# )
-# all_degree_plots(
-#     reg_lambda=1,
-#     reg_type="ridge",
-#     plt_title="L2 Regularization Plots",
-#     file_name="L2_regularization_results.json",
-# )
-# compare()
+    fig.add_trace(
+        go.Scatter(
+            x=no_reg_df["degree"],
+            y=no_reg_df["var"],
+            mode="lines",
+            name="No Regularization",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=l1_reg_df["degree"],
+            y=l1_reg_df["var"],
+            mode="lines",
+            name="L1 Regularization",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=l2_reg_df["degree"],
+            y=l2_reg_df["var"],
+            mode="lines",
+            name="L2 Regularization",
+        )
+    )
+    fig.update_layout(
+        title="Degree vs VAR for the three regularization types",
+        xaxis_title="Degree",
+        yaxis_title="VAR",
+        height=600,
+        width=800,
+    )
+    fig.show()
+
+
+def run_all_regularization():
+    all_degree_plots(
+        reg_lambda=0,
+        plt_title="No Regularization Plots",
+        file_name="no_regularization_results.json",
+    )
+    all_degree_plots(
+        reg_lambda=1,
+        reg_type="lasso",
+        plt_title="L1 Regularization Plots",
+        file_name="L1_regularization_results.json",
+    )
+    all_degree_plots(
+        reg_lambda=1,
+        reg_type="ridge",
+        plt_title="L2 Regularization Plots",
+        file_name="L2_regularization_results.json",
+    )
+    compare()
+
+
+if __name__ == "__main__":
+    # run_all_regularization()
+    pass
