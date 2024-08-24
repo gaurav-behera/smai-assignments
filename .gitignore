@@ -3,3 +3,4 @@ questions/
 .ipynb_checkpoints
 __pycache__/
 wandb/
+frames-deg*/
