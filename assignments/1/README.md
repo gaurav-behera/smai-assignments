@@ -546,9 +546,9 @@ The plots are plotted till either the MSE, Standard Deviation or Variance start 
 
 Here are the attached gifs for degrees 1,2,5,17 and 21
 
-| ![degree 1](figures/regression//animation-deg1.gif) degree 1 | ![degree 2](figures/regression//animation-deg2.gif) degree 2    |
-| ------------------------------------------------------------ | --------------------------------------------------------------- |
-| ![degree 5](figures/regression//animation-deg5.gif) degree 5 | ![degree 21](figures/regression//animation-deg17.gif) degree 21 |
+| ![degree 1](figures/regression/animation-deg1.gif) degree 1 | ![degree 2](figures/regression/animation-deg2.gif) degree 2    |
+| ----------------------------------------------------------- | -------------------------------------------------------------- |
+| ![degree 5](figures/regression/animation-deg5.gif) degree 5 | ![degree 21](figures/regression/animation-deg21.gif) degree 21 |
 
 The number of epochs for convergence in the above cases with random initialization are:
 
