@@ -38,6 +38,7 @@ def split_data(data, target_column, ratio=[0.8, 0.1, 0.1]):
     test_count = int(ratio[2] * size)
     validation_count = size - train_count - test_count
 
+    # np.random.seed(int(time.time()))
     all_idx = np.random.permutation(size)
     train_idx = all_idx[:train_count]
     validation_idx = all_idx[train_count : train_count + validation_count]
