@@ -64,6 +64,14 @@ def _drop_columns(data, columns):
     data = data.drop(columns=columns)
     return data
 
+def _expand_column(data, column):
+    """
+    Expand a column
+    """
+    embedding_size = data[column][0].shape[0]
+    new_data = pd.DataFrame(data[column].to_list(), columns=[f"{column}_{i}" for i in range(embedding_size)])
+    data = pd.concat([data, new_data], axis=1)
+    return data
 
 # call all the above functions based on parameters passed
 def process_data(
@@ -75,6 +83,7 @@ def process_data(
     boolean_encode=[],
     linear_norm=[],
     z_index_norm=[],
+    col_expansion=[],
     drop_columns=[],
 ):
     """
@@ -96,6 +105,8 @@ def process_data(
         A list of columns to linear normalize
     z_index_norm : list
         A list of columns to z-index normalize
+    col_expansion : list
+        A list of columns to expand
     drop_columns : list
         A list of columns to drop
     """
@@ -115,5 +126,7 @@ def process_data(
         data = _linear_normalize(data, column)
     for column in z_index_norm:
         data = _z_index_normalize(data, column)
+    for column in col_expansion:
+        data = _expand_column(data, column)
     data = _drop_columns(data, drop_columns)
     return data
