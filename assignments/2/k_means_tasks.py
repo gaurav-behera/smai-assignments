@@ -54,8 +54,9 @@ def sample_clustering(k):
     for i in range(k):
         print("\t\tCluster", i, ":", np.sum(cluster_preds == i))
     
-        
+def task_3_2():
+    wcss_vs_k()
+    k_kmeans1 = 5
+    sample_clustering(k=k_kmeans1)
+    
 # analyse_2d_clustering_data() 
-# wcss_vs_k()
-# k_kmeans1 = 5
-# sample_clustering(k=k_kmeans1)

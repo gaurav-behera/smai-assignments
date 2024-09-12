@@ -32,5 +32,6 @@ def reduce_dimensions(n_components):
         fig = px.scatter_3d(df, x="PC1", y="PC2", z="PC3", title="PCA on word-embeddings - 3 components", width=1000, height=800)
         fig.show()
     
-reduce_dimensions(n_components=2)
-reduce_dimensions(n_components=3)
+def task_5_2():
+    reduce_dimensions(2)
+    reduce_dimensions(3)

@@ -105,10 +105,12 @@ def sample_clustering(k, model):
     print("\tAIC:", aic)
     print("\tBIC:", bic)
 
-
+def task_4_2():
+    sample_clustering(k=3, model=GMM(k=3))
+    sample_clustering(k=3, model=GMM_sklearn(k=3))
+    aic_bic_vs_k()
+    k_gmm1 = 1
+    sample_clustering(k=k_gmm1, model=GMM_sklearn(k=k_gmm1))
+    
 # analyse_2d_clustering_data()
-# sample_clustering(k=3, model=GMM(k=3))
-sample_clustering(k=3, model=GMM_sklearn(k=3))
-# aic_bic_vs_k()
-k_gmm1 = 1
-# sample_clustering(k=1, model=GMM_sklearn(k=1))
+
