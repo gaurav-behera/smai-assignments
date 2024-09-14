@@ -59,58 +59,96 @@ def analyse_2d_clustering_data():
     fig.show()
 
 
-def aic_bic_vs_k():
-    data = pd.read_csv(os.path.join(base_dir, "data", "processed", "word-embeddings.csv"), index_col=0)
+def aic_bic_vs_k(model="own", reduced=False):
+    data = pd.read_csv(
+        os.path.join(base_dir, "data", "processed", "word-embeddings.csv"), index_col=0
+    )
+    if reduced:
+        data = pd.read_csv(
+            os.path.join(base_dir, "data", "processed", "word-embeddings-reduced.csv"),
+            index_col=0,
+        )
+    data = data.drop(columns=['words'])
     data = data.to_numpy()
 
     results = []
     for _k in range(1, 15):
-        gmm = GMM_sklearn(k=_k)
+        match model:
+            case "own":
+                gmm = GMM(k=_k)
+            case "sklearn":
+                gmm = GMM_sklearn(k=_k)
         gmm.fit(data)
         dims = data.shape[1]
-        k = _k*dims + _k*(dims*dims + dims)//2 + _k - 1 # number of parameters
-        l = gmm.getLogLikelihood(data) # log-likelihood
-        n = data.shape[0] # number of samples
-        aic = 2*k - 2*l
-        bic = k*np.log(n) - 2*l
-        results.append({"k": _k, "aic": aic, "bic": bic, "log-likelihood": l, "parameters": k, "n": n})
-    
+        k = _k * dims + _k * (dims * dims + dims) // 2 + _k - 1  # number of parameters
+        l = gmm.getLogLikelihood(data)  # log-likelihood
+        n = data.shape[0]  # number of samples
+        aic = 2 * k - 2 * l
+        bic = k * np.log(n) - 2 * l
+        results.append(
+            {
+                "k": _k,
+                "aic": aic,
+                "bic": bic,
+                "log-likelihood": l,
+                "parameters": k,
+                "n": n,
+            }
+        )
+
     # plot the results
     df = pd.DataFrame(results)
     # plot AIC and BIC
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df["k"], y=df["aic"], mode="lines+markers", name="AIC"))
     fig.add_trace(go.Scatter(x=df["k"], y=df["bic"], mode="lines+markers", name="BIC"))
-    fig.update_layout(title="AIC and BIC vs K for word-embeddings", xaxis_title="K", yaxis_title="Value", width=800, height=600)
+    fig.update_layout(
+        title=f"AIC and BIC vs K for word-embeddings{"-reduced" if reduced else ""}",
+        xaxis_title="K",
+        yaxis_title="Value",
+        width=800,
+        height=600,
+    )
     fig.show()
 
-    with open("aic_bic_vs_k.json", "w") as f:
+    with open(f"aic_bic_vs_k{"_reduced" if reduced else ""}.json", "w") as f:
         json.dump(results, f)
 
-def sample_clustering(k, model):
-    data = pd.read_csv(os.path.join(base_dir, "data", "processed", "word-embeddings.csv"), index_col=0).to_numpy()
 
-    print("GMM clustering with k =", k, "on word-embeddings data")
+def sample_clustering(k, model, reduced=False):
+    data = pd.read_csv(
+        os.path.join(base_dir, "data", "processed", "word-embeddings.csv"), index_col=0
+    )
+    if reduced:
+        data = pd.read_csv(
+            os.path.join(base_dir, "data", "processed", "word-embeddings-reduced.csv"),
+            index_col=0,
+        )
+    data = data.drop(columns=['words'])
+    data = data.to_numpy()
+
+    print("GMM clustering with k =", k, f"on word-embeddings{"-reduced" if reduced else ""} data")
     gmm = model
     gmm.fit(data)
-    cluster_preds = np.argmax( gmm.getMembership(data), axis=1)
     print("\tFinal likelihood:", gmm.getLikelihood(data).round(2))
     print("\tFinal log-likelihood:", gmm.getLogLikelihood(data).round(2))
-    dims = data.shape[1]
-    _k = k*dims + k*(dims*dims + dims)//2 + k - 1 # number of parameters
-    l = gmm.getLogLikelihood(data) # log-likelihood
-    n = data.shape[0] # number of samples
-    aic = 2*_k - 2*l
-    bic = _k*np.log(n) - 2*l
-    print("\tAIC:", aic)
-    print("\tBIC:", bic)
+    print("\tAIC:", gmm.aic(data))
+    print("\tBIC:", gmm.bic(data))
+
 
 def task_4_2():
     sample_clustering(k=3, model=GMM(k=3))
     sample_clustering(k=3, model=GMM_sklearn(k=3))
-    aic_bic_vs_k()
+    aic_bic_vs_k(model="sklearn")
     k_gmm1 = 1
     sample_clustering(k=k_gmm1, model=GMM_sklearn(k=k_gmm1))
-    
-# analyse_2d_clustering_data()
 
+
+def task_6_3():
+    k_2 = 3
+    sample_clustering(k=k_2, model=GMM(k=k_2))
+
+def task_6_4():
+    # aic_bic_vs_k(reduced=True)
+    k_gmm3 = 3
+    sample_clustering(k=k_gmm3, model=GMM(k=k_gmm3), reduced=True)

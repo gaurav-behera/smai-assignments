@@ -24,8 +24,11 @@ def analyse_2d_clustering_data():
     fig = px.scatter(data, x="x", y="y", title="2D Clustering Data - Clustered", width=800, height=600, color="cluster")
     fig.show()
     
-def wcss_vs_k():
+def wcss_vs_k(reduced=False):
     data = pd.read_csv(os.path.join(base_dir, "data", "processed", "word-embeddings.csv"), index_col=0)
+    if reduced:
+        data = pd.read_csv(os.path.join(base_dir, "data", "processed", "word-embeddings-reduced.csv"), index_col=0)
+    data = data.drop(columns=['words'])
     data = data.to_numpy()
     
     results = []
@@ -36,16 +39,21 @@ def wcss_vs_k():
     
     # plot the results
     df = pd.DataFrame(results)
-    fig = px.line(df, x="k", y="wcss", title="WCSS vs K for word-embeddings", width=800, height=600)
+    fig = px.line(df, x="k", y="wcss", title=f"WCSS vs K for word-embeddings{' reduced' if reduced else ''}", width=800, height=600)
     fig.show()
     
-    with open("wcss_vs_k.json", "w") as f:
+    with open(f"wcss_vs_k{'_reduced' if reduced else ''}.json", "w") as f:
         json.dump(results, f)
 
-def sample_clustering(k):
-    data = pd.read_csv(os.path.join(base_dir, "data", "processed", "word-embeddings.csv"), index_col=0).to_numpy()
+def sample_clustering(k, reduced=False):
+    data = pd.read_csv(os.path.join(base_dir, "data", "processed", "word-embeddings.csv"), index_col=0)
+    if reduced:
+        data = pd.read_csv(os.path.join(base_dir, "data", "processed", "word-embeddings-reduced.csv"), index_col=0)
+    words = data['words']
+    data = data.drop(columns=['words'])
+    data = data.to_numpy()
     
-    print("KMeans clustering with k =", k, "on word-embeddings data")
+    print("KMeans clustering with k =", k, f"on word-embeddings{'-reduced' if reduced else ''} data")
     kmeans = KMeans(k=k)
     kmeans.fit(data)
     cluster_preds = kmeans.predict(data)
@@ -54,9 +62,30 @@ def sample_clustering(k):
     for i in range(k):
         print("\t\tCluster", i, ":", np.sum(cluster_preds == i))
     
+    return words, cluster_preds
+
+# def sematic_cluster_analysis(words, cluster_preds):
+#     k = np.unique(cluster_preds)
+
 def task_3_2():
     wcss_vs_k()
     k_kmeans1 = 5
     sample_clustering(k=k_kmeans1)
-    
+
+def task_6_1():
+    k_2 = 3
+    sample_clustering(k=k_2)
+
+def task_6_2_b():
+    wcss_vs_k(reduced=True)
+    k_kmeans3 = 6
+    sample_clustering(k=k_kmeans3, reduced=True)
+
+def task_7_1():
+    k_means1 = 5
+    k_2 = 3
+    k_means3 = 6
+    args1 = sample_clustering(k=k_means1)
+    sematic_cluster_analysis(*args1)
+    pass
 # analyse_2d_clustering_data() 
