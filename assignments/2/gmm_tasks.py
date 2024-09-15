@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import json
 import time
+from sklearn.metrics import silhouette_score
 
 base_dir = setup_base_dir(levels=2)
 
@@ -135,6 +136,70 @@ def sample_clustering(k, model, reduced=False):
     print("\tAIC:", gmm.aic(data))
     print("\tBIC:", gmm.bic(data))
 
+def cluster_analysis(k, model, reduced=False):
+    data = pd.read_csv(
+        os.path.join(base_dir, "data", "processed", "word-embeddings.csv"), index_col=0
+    )
+    if reduced:
+        data = pd.read_csv(
+            os.path.join(base_dir, "data", "processed", "word-embeddings-reduced.csv"),
+            index_col=0,
+        )
+    words = data["words"]
+    data = data.drop(columns=['words'])
+    data = data.to_numpy()
+
+    gmm = model
+    gmm.fit(data)
+    soft_cluster_preds = gmm.getMembership(data)
+    # soft to hard clustering
+    cluster_preds = np.argmax(soft_cluster_preds, axis=1)
+    
+    clusters = {i:[] for i in range(k)}
+    for i in range(len(words)):
+        clusters[cluster_preds[i]].append(words[i])
+    for _k in range(k):
+        print(f"Words in cluster {_k}:")
+        print("\t", ", ".join(clusters[_k]))
+    
+    # words which have significant probability in multiple clusters
+    print("Words with significant probability in multiple clusters:")
+    for i in range(len(words)):
+        sorted_cluster_probs = np.sort(soft_cluster_preds[i])
+        if k>1 and sorted_cluster_probs[1] > (1/k):
+            print("\t", words[i], soft_cluster_preds[i])
+        
+        
+    # intra-cluster distance
+    intra_cluster_distances = []
+    for i in range(k):
+        cluster_data = data[cluster_preds == i]
+        cluster_centroid = np.mean(cluster_data, axis=0)
+        intra_cluster_distances.append(np.sum((cluster_data - cluster_centroid) ** 2))
+    avg_intra_cluster_distance = np.mean(np.array(intra_cluster_distances))
+    print("Average Intra-cluster distances:", avg_intra_cluster_distance)
+    
+    # inter-cluster distance
+    inter_cluster_distances = []
+    for i in range(k):
+        for j in range(i + 1, k):
+            inter_cluster_distances.append(np.sum((np.mean(data[cluster_preds == i], axis=0) - np.mean(data[cluster_preds == j], axis=0)) ** 2))
+    avg_inter_cluster_distance = np.mean(np.array(inter_cluster_distances))
+    print("Average Inter-cluster distances:", avg_inter_cluster_distance)
+    
+    # silhouette score
+    avg_silhouette_score = silhouette_score(data, cluster_preds) if k>1 else np.nan
+    print("Average Silhouette score:", avg_silhouette_score)
+    
+    # save results
+    results = {
+        "clusters": clusters,
+        "avg_intra_cluster_distances": avg_intra_cluster_distance,
+        "avg_inter_cluster_distances": avg_inter_cluster_distance,
+        "avg_ilhouette_score": avg_silhouette_score
+    }
+    with open (f"gmm_cluster_analysis_k{k}{'_reduced' if reduced else ''}.json", "w") as f:
+        json.dump(results, f)
 
 def task_4_2():
     sample_clustering(k=3, model=GMM(k=3))
@@ -149,6 +214,16 @@ def task_6_3():
     sample_clustering(k=k_2, model=GMM(k=k_2))
 
 def task_6_4():
-    # aic_bic_vs_k(reduced=True)
+    aic_bic_vs_k(reduced=True)
     k_gmm3 = 3
     sample_clustering(k=k_gmm3, model=GMM(k=k_gmm3), reduced=True)
+
+def task_7_2():
+    k_gmm1 = 1
+    k_2 = 3
+    k_gmm3 = 3
+    cluster_analysis(k=k_gmm1, model=GMM_sklearn(k=k_gmm1))
+    cluster_analysis(k=k_2, model=GMM_sklearn(k=k_2))
+    cluster_analysis(k=k_gmm3, model=GMM_sklearn(k=k_gmm3), reduced=True)
+    
+# analyse_2d_clustering_data()

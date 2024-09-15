@@ -1,0 +1,34 @@
+k=5
+Words in cluster 0:
+         drive, rose, dive, table, carrot, brick, smile, bear, spider, bullet, shark, grass, forest, lizard, mug, bend, frog, puppet, lake, face, kneel, scream, monkey, kiss, passport, roof, plant, microwave, notebook, cigarette, hollow, puppy, boat, fish, saturn, drink, grape, laptop, door, calendar, mouse, finger, candle, igloo, goldfish, bird, clock, oven, calculator, spiderman, pillow, tree, envelope, hammer, snake, tattoo, fingerprints, dustbin, rain, tank, airplane, ambulance, pizza, television, throne, swim, zip, sword, loudspeaker, telephone, stove, rainy, knife, wheel, arrow, toaster, shoe, walk, keyboard, sunny, radio, truck
+Words in cluster 1:
+         helicopter, needle, eraser, giraffe, brush, feather, spoon, pencil, sweater, microphone, jacket, bench, pear, peacock, flute, scissor, chair, beetle, toothbrush, screwdriver, teaspoon, length, tent, dragonfly, parachute, butterfly, lantern, toothpaste, windmill, comb, crocodile, fork, paintbrush
+Words in cluster 2:
+         deer, panda, ape, sit, cat, eat, gym, rifle, cow, bed, starfish, dig, run, van, sun, feet, fruit, ant, bee, camera, tomato, car, elephant, pant, potato
+Words in cluster 3:
+         fishing, climb, stairs, knit, baseball, bucket, basket, badminton, ladder, skate, basketball, bicycle, suitcase
+Words in cluster 4:
+         sing, listen, flame, knock, exit, bury, download, postcard, hard, fight, call, fly, selfie, catch, hit, paint, far, cry, clap, pull, sleep, clean, sad, empty, slide, draw, pray, arrest, email, buy, burn, fire, close, angry, lazy, scary, hang, book, earth, enter, key, happy, loud, love, cook, recycle, cut
+
+
+k=3
+Words in cluster 0:
+         listen, flame, sit, knock, smile, bury, download, eat, postcard, hard, fight, call, fly, face, selfie, catch, hit, paint, far, dig, cry, run, clap, pull, sleep, clean, sad, slide, draw, pray, arrest, email, buy, burn, fire, close, angry, lazy, scary, hang, book, earth, enter, happy, loud, love, cook, recycle, cut
+Words in cluster 1:
+         deer, panda, ape, helicopter, cat, eraser, carrot, bear, spider, shark, giraffe, lizard, frog, gym, monkey, rifle, cow, pencil, bed, starfish, van, sweater, jacket, sun, feet, pear, peacock, saturn, fruit, grape, ant, igloo, goldfish, spiderman, bee, tree, beetle, tent, tomato, dragonfly, parachute, butterfly, car, lantern, elephant, pant, windmill, potato, crocodile
+Words in cluster 2:
+         drive, sing, rose, dive, needle, table, exit, brick, fishing, bullet, grass, forest, brush, mug, feather, spoon, bend, puppet, lake, climb, kneel, scream, kiss, passport, roof, stairs, plant, microwave, notebook, knit, cigarette, microphone, baseball, hollow, bench, bucket, puppy, boat, basket, empty, fish, flute, drink, scissor, laptop, door, calendar, badminton, chair, mouse, ladder, finger, candle, bird, clock, oven, calculator, pillow, envelope, skate, hammer, toothbrush, screwdriver, snake, tattoo, fingerprints, teaspoon, length, dustbin, rain, tank, airplane, ambulance, pizza, television, throne, key, swim, camera, zip, sword, loudspeaker, telephone, stove, rainy, knife, toothpaste, basketball, wheel, bicycle, arrow, toaster, comb, shoe, walk, keyboard, fork, sunny, radio, truck, suitcase, paintbrush
+
+k=6
+Words in cluster 0:
+         helicopter, stairs, spiderman, airplane, parachute, toothpaste, suitcase
+Words in cluster 1:
+         postcard, passport, notebook, pull, slide, calendar, email, envelope
+Words in cluster 2:
+         sit, eraser, table, mug, gym, roof, rifle, pencil, bed, microwave, dig, run, van, sweater, cigarette, microphone, jacket, bench, sun, laptop, door, chair, ladder, candle, igloo, clock, oven, calculator, pillow, hammer, toothbrush, ambulance, television, throne, tent, camera, tomato, car, loudspeaker, lantern, telephone, stove, wheel, toaster, potato, comb, keyboard, radio, truck
+Words in cluster 3:
+         deer, panda, ape, rose, cat, needle, carrot, brick, bear, spider, bullet, shark, grass, giraffe, forest, lizard, brush, feather, spoon, bend, frog, puppet, fly, lake, monkey, cow, starfish, plant, bucket, puppy, feet, boat, pear, peacock, fish, saturn, flute, fruit, scissor, grape, mouse, finger, ant, goldfish, bird, bee, tree, beetle, screwdriver, snake, teaspoon, length, dustbin, pizza, zip, dragonfly, butterfly, sword, elephant, pant, knife, bicycle, windmill, arrow, crocodile, shoe, fork, paintbrush
+Words in cluster 4:
+         listen, flame, knock, bury, download, eat, hard, fight, call, hit, far, cry, sleep, clean, sad, draw, pray, arrest, buy, burn, fire, close, angry, lazy, scary, hang, book, enter, happy, loud, love, cook, recycle, cut
+Words in cluster 5:
+         drive, sing, dive, exit, fishing, smile, face, climb, kneel, scream, kiss, selfie, catch, paint, clap, knit, baseball, hollow, basket, empty, drink, badminton, skate, tattoo, earth, fingerprints, rain, tank, key, swim, rainy, basketball, walk, sunny
