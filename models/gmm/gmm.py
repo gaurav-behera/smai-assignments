@@ -45,6 +45,7 @@ class GMM:
         self._pis = pis / np.sum(pis)
         self.log_likelihood = self.getLogLikelihood(X)
         pbar = tqdm(desc="Finding clusters", position=0, leave=True)
+        print("Initial log likelihood:", self.log_likelihood)
 
         curr_iter = 0
         while True:
@@ -119,7 +120,7 @@ class GMM:
         """
         cluster_probs = np.zeros((X.shape[0], self.k))
         for j in range(self.k):
-            cluster_probs[:, j] = 10e5*self._pis[j] * self._multivariate_normal(X, self._means[j], self._covs[j])
+            cluster_probs[:, j] = self._pis[j] * self._multivariate_normal(X, self._means[j], self._covs[j])
         cluster_probs_sum = np.sum(cluster_probs, axis=1)
         cluster_probs_sum = np.where(cluster_probs_sum == 0, 1, cluster_probs_sum)
         return cluster_probs / cluster_probs_sum[:, np.newaxis]
