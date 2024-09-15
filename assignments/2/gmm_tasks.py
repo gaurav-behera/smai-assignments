@@ -196,7 +196,7 @@ def cluster_analysis(k, model, reduced=False):
         "clusters": clusters,
         "avg_intra_cluster_distances": avg_intra_cluster_distance,
         "avg_inter_cluster_distances": avg_inter_cluster_distance,
-        "avg_ilhouette_score": avg_silhouette_score
+        "avg_silhouette_score": avg_silhouette_score
     }
     with open (f"gmm_cluster_analysis_k{k}{'_reduced' if reduced else ''}.json", "w") as f:
         json.dump(results, f)
