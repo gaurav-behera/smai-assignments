@@ -95,7 +95,7 @@ def scree_plot():
 
     data = data - np.mean(data, axis=0)
     data = np.matrix(data)
-    u, s, vt = np.linalg.svd(data)
+    u, s, vt = np.linalg.svd(data, full_matrices=False)
     s = s**2
     normalised_s = s / np.sum(s)
     df = pd.DataFrame({"PC": [f"PC{i+1}" for i in range(len(s))], "eigenvalues": s, "normalised_eigenvalues": normalised_s})

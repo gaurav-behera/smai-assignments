@@ -222,8 +222,8 @@ def task_7_2():
     k_gmm1 = 1
     k_2 = 3
     k_gmm3 = 3
-    cluster_analysis(k=k_gmm1, model=GMM_sklearn(k=k_gmm1))
-    cluster_analysis(k=k_2, model=GMM_sklearn(k=k_2))
-    cluster_analysis(k=k_gmm3, model=GMM_sklearn(k=k_gmm3), reduced=True)
+    cluster_analysis(k=k_gmm1, model=GMM(k=k_gmm1))
+    cluster_analysis(k=k_2, model=GMM(k=k_2))
+    cluster_analysis(k=k_gmm3, model=GMM(k=k_gmm3), reduced=True)
     
 # analyse_2d_clustering_data()
