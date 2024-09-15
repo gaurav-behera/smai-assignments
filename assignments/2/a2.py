@@ -4,13 +4,14 @@ from k_means_tasks import task_3_2, task_6_1, task_6_2_b, task_7_1
 from gmm_tasks import task_4_2, task_6_3, task_6_4, task_7_2
 from pca_tasks import task_5_2, task_5_3, task_6_2_a
 from hierarchical_clustering import task_8
+from spotify_tasks import task_9_1, task_9_2
 
 def main():
     parser = argparse.ArgumentParser(description="Driver for Assignment 2.")
     parser.add_argument(
         "--task",
         type=str,
-        choices=["3.2", "4.2", "5.2", "5.3", "6.1", "6.2", "6.3", "6.4", "7.1", "7.2", "8"],
+        choices=["3.2", "4.2", "5.2", "5.3", "6.1", "6.2", "6.3", "6.4", "7.1", "7.2", "8", "9.1"],
         required=True,
         help="Enter the task to run.",
     )
@@ -62,6 +63,14 @@ def main():
             print("Running task 8...")
             task_8()
             print("Task 8 completed.")
+        case "9.1":
+            print("Running task 9.1...")
+            task_9_1()
+            print("Task 9.1 completed.")
+        case "9.2":
+            print("Running task 9.2...")
+            task_9_2()
+            print("Task 9.2 completed.")
         case _:
             print(
                 "Invalid task specified."
