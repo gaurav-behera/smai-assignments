@@ -11,7 +11,7 @@ def main():
     parser.add_argument(
         "--task",
         type=str,
-        choices=["3.2", "4.2", "5.2", "5.3", "6.1", "6.2", "6.3", "6.4", "7.1", "7.2", "8", "9.1"],
+        choices=["3.2", "4.2", "5.2", "5.3", "6.1", "6.2", "6.3", "6.4", "7.1", "7.2", "8", "9.1", "9.2"],
         required=True,
         help="Enter the task to run.",
     )
