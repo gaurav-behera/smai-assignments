@@ -200,8 +200,6 @@ Here is the 2d plot with all the words:
 
 ![pca_word_embeddings_2_comp_words.png](figures/pca_word_embeddings_2_comp_words.png)
 
-(Below inference done with the help of LLMs)
-
 The first principal component, encodes something along the lines of emotions. The high -ve values represent emotions or something with some level of engagement, whereas the high +ve values represent neutral objects with little level of emotion.
 
 The second principal component, encodes something along the lines of distinction between animate/biological and inanimate/artificial. The high -ve values are related to living beings or actions associated with life, whereas the high +ve values represent inanimate or artificial objects.
@@ -700,3 +698,6 @@ The inference time reduces by almost 35%
 The accuracy reduces by almost 13%
 
 There is thus this tradeoff between desired accuracy and inference time. Higher accuracy can be achieved on dataset with higher dimensions but have high inference time. PCA does a great job of reducing the dimensions to a smaller compact set (which still retains valuable information) thus reducing the inference time. This however does come at a small cost of losing the accuracy which is not very significant.
+
+# References
+ChatGPT prompt for all the above semantic analysis: https://chatgpt.com/share/66e9a18d-4f04-8006-b951-10a046a5e249
