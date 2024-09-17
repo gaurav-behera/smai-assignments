@@ -524,7 +524,7 @@ Complete linkage forms more compact and evenly spaced clusters since it focuses 
 
 Here is again the plot of the euclidean metric with complete linkage on the dataset:
 
-![dendogram-method-complete-metric-euclidean.png](figures/dendogram-method-complete-metric-euclidean%201.png)
+![dendogram-method-complete-metric-euclidean.png](figures/dendogram-method-complete-metric-euclidean.png)
 
 ## Creating Clusters and Analysis
 
