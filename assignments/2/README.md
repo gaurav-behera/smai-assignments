@@ -609,7 +609,7 @@ To find out the optimal number of principal components in the dataset, we plot t
 
 Based on the above graph, the elbow point is at 6. Thus the reduced dataset has only 6 components which are principal components.
 
-Running PCA on the dataset to reduce it to 4 dimensions gives the following output:
+Running PCA on the dataset to reduce it to 6 dimensions gives the following output:
 
 ```python
 Reconstruction error in checkPCA(): 0.15918041531183655
