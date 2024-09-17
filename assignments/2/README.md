@@ -699,4 +699,4 @@ The inference time reduces by almost 35%
 
 The accuracy reduces by almost 13%
 
-There is thus this tradeoff between desired accuracy and inference time. Higher accuracy can be achieved on dataset with higher dimensions but have low inference time. PCA does a great job of reducing the dimensions to a smaller compact set (which still retains valuable information) thus reducing the inference time. This however does come at a small cost of losing the accuracy which is not very significant.
+There is thus this tradeoff between desired accuracy and inference time. Higher accuracy can be achieved on dataset with higher dimensions but have high inference time. PCA does a great job of reducing the dimensions to a smaller compact set (which still retains valuable information) thus reducing the inference time. This however does come at a small cost of losing the accuracy which is not very significant.
