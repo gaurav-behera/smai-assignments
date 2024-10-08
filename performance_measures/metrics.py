@@ -25,7 +25,7 @@ class Metrics:
         float
             The accuracy of the model
         """
-        return np.mean(y_true == y_pred)
+        return np.mean(np.all(y_true == y_pred, axis=1))
 
     def precision(self, y_true, y_pred, type="micro"):
         """
@@ -45,18 +45,17 @@ class Metrics:
         float
             The precision of the model
         """
-        classes = np.unique(np.concatenate((y_true, y_pred)))
         if type == "micro":
-            tp = np.sum([np.sum((y_true == c) & (y_pred == c)) for c in classes])
-            fp = np.sum([np.sum((y_true != c) & (y_pred == c)) for c in classes])
+            tp = np.sum((y_true == 1) & (y_pred == 1))
+            fp = np.sum((y_true == 0) & (y_pred == 1))
             return (tp / (tp + fp)) if (tp + fp) > 0 else 0.0
         elif type == "macro":
-            precision_list = []
-            for c in classes:
-                tp = np.sum((y_true == c) & (y_pred == c))
-                fp = np.sum((y_true != c) & (y_pred == c))
-                precision_list.append(tp / (tp + fp) if (tp + fp) > 0 else 0.0)
-            return np.mean(precision_list)
+            precisions = []
+            for i in range(y_true.shape[1]):  # Loop over each label
+                tp = np.sum((y_true[:, i] == 1) & (y_pred[:, i] == 1))
+                fp = np.sum((y_true[:, i] == 0) & (y_pred[:, i] == 1))
+                precisions.append(tp / (tp + fp) if (tp + fp) > 0 else 0.0)
+            return np.mean(precisions)
         else:
             raise ValueError("Invalid type")
 
@@ -78,18 +77,17 @@ class Metrics:
         float
             The recall of the model
         """
-        classes = np.unique(np.concatenate((y_true, y_pred)))
         if type == "micro":
-            tp = np.sum([np.sum((y_true == c) & (y_pred == c)) for c in classes])
-            fn = np.sum([np.sum((y_true == c) & (y_pred != c)) for c in classes])
+            tp = np.sum((y_true == 1) & (y_pred == 1))
+            fn = np.sum((y_true == 1) & (y_pred == 0))
             return (tp / (tp + fn)) if (tp + fn) > 0 else 0.0
         elif type == "macro":
-            recall_list = []
-            for c in classes:
-                tp = np.sum((y_true == c) & (y_pred == c))
-                fn = np.sum((y_true == c) & (y_pred != c))
-                recall_list.append(tp / (tp + fn) if (tp + fn) > 0 else 0.0)
-            return np.mean(recall_list)
+            recalls = []
+            for i in range(y_true.shape[1]):  # Loop over each label
+                tp = np.sum((y_true[:, i] == 1) & (y_pred[:, i] == 1))
+                fn = np.sum((y_true[:, i] == 1) & (y_pred[:, i] == 0))
+                recalls.append(tp / (tp + fn) if (tp + fn) > 0 else 0.0)
+            return np.mean(recalls)
         else:
             raise ValueError("Invalid type")
 
@@ -110,21 +108,16 @@ class Metrics:
         -------
         float : The F1 score of the model
         """
-        classes = np.unique(np.concatenate((y_true, y_pred)))
         if type == "micro":
-            precision = self.precision(y_true, y_pred, type)
-            recall = self.recall(y_true, y_pred, type)
-            return (
-                (2 * precision * recall / (precision + recall))
-                if (precision + recall) > 0
-                else 0.0
-            )
+            precision = self.precision(y_true, y_pred, type="micro")
+            recall = self.recall(y_true, y_pred, type="micro")
+            return (2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
         elif type == "macro":
             f1_list = []
-            for c in classes:
-                tp = np.sum((y_true == c) & (y_pred == c))
-                fp = np.sum((y_true != c) & (y_pred == c))
-                fn = np.sum((y_true == c) & (y_pred != c))
+            for i in range(y_true.shape[1]):  # Loop over each label
+                tp = np.sum((y_true[:, i] == 1) & (y_pred[:, i] == 1))
+                fp = np.sum((y_true[:, i] == 0) & (y_pred[:, i] == 1))
+                fn = np.sum((y_true[:, i] == 1) & (y_pred[:, i] == 0))
                 p = tp / (tp + fp) if (tp + fp) > 0 else 0.0
                 r = tp / (tp + fn) if (tp + fn) > 0 else 0.0
                 f1_list.append(2 * p * r / (p + r) if (p + r) > 0 else 0.0)
@@ -185,3 +178,60 @@ class Metrics:
             The variance of the model
         """
         return np.var(y_true - y_pred)
+    
+    def root_mean_squared_error(self, y_true, y_pred):
+        """
+        Calculate the root mean squared error of the model
+
+        Parameters
+        ----------
+        y_true : numpy.ndarray
+            The true target values
+        y_pred : numpy.ndarray
+            The predicted target values
+
+        Returns
+        -------
+        float
+            The root mean squared error of the model
+        """
+        return np.sqrt(np.mean((y_true - y_pred) ** 2))
+    
+    def r2_score(self, y_true, y_pred):
+        """
+        Calculate the R^2 score of the model
+
+        Parameters
+        ----------
+        y_true : numpy.ndarray
+            The true target values
+        y_pred : numpy.ndarray
+            The predicted target values
+
+        Returns
+        -------
+        float
+            The R^2 score of the model
+        """
+        mean_y = np.mean(y_true)
+        ss_tot = np.sum((y_true - mean_y) ** 2)
+        ss_res = np.sum((y_true - y_pred) ** 2)
+        return 1 - (ss_res / ss_tot)
+    
+    def hamming_distance(self, y_true, y_pred):
+        """
+        Calculate the hamming distance of the model
+
+        Parameters
+        ----------
+        y_true : numpy.ndarray
+            The true target values
+        y_pred : numpy.ndarray
+            The predicted target values
+
+        Returns
+        -------
+        float
+            The hamming distance of the model
+        """
+        return np.mean(np.sum(y_true != y_pred, axis=1))
