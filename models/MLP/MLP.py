@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from performance_measures.metrics import Metrics
+import wandb
 
 
 class MLP:
@@ -10,7 +11,7 @@ class MLP:
     Parameters
     ----------
     learning_rate : float
-        The learning rate for the model. Default is 0.01.
+        The learning rate for the model. Default is 0.1.
     activation_function : str
         The activation function to use in the hidden layers. Default is "relu". Available options are "relu", "sigmoid", "tanh", "linear".
     optimizer : str
@@ -27,6 +28,10 @@ class MLP:
         The size of the input layer. Default is 1.
     output_layer_size : int
         The size of the output layer. Default is 1.
+    log_wandb : bool
+        Whether to log the metrics to Weights & Biases. Default is False.
+    log_local : bool
+        Whether to log the metrics to a local variable. Default is False.
     task : str
         The task to perform. Default is "regression". Available options are "regression", "classification-single-label", "classification-multi-label".
     """
@@ -42,6 +47,8 @@ class MLP:
         epochs=1000,
         input_layer_size=1,
         output_layer_size=1,
+        log_wandb=False,
+        log_local=False,
         task="regression",
     ):
         self.learning_rate = learning_rate
@@ -53,6 +60,8 @@ class MLP:
         self.epochs = epochs
         self.input_layer_size = input_layer_size
         self.output_layer_size = output_layer_size
+        self.log_wandb = log_wandb
+        self.log_local = log_local
         self.task = task
         self.metrics = Metrics()
 
@@ -97,6 +106,9 @@ class MLP:
                     "Invalid task specified. Available options are 'regression', 'classification-single-label', 'classification-multi-label'."
                 )
 
+        if log_local:
+            self.logs = []
+
         self._initialize_model()
 
     # activation functions
@@ -104,6 +116,7 @@ class MLP:
         return np.maximum(0, x)
 
     def _sigmoid(self, x):
+        x = np.clip(x, -500, 500)  # for numerical stability
         return 1 / (1 + np.exp(-x))
 
     def _tanh(self, x):
@@ -135,7 +148,8 @@ class MLP:
 
     # cost functions
     def _mean_squared_error(self, y_pred, y):
-        return np.mean((y_pred - y) ** 2)
+        diff = np.subtract(y_pred, y, dtype=np.float64)
+        return np.mean(np.square(diff, dtype=np.float64))
 
     def _cross_entropy(self, y_pred, y):
         epsilon = 1e-4
@@ -156,17 +170,22 @@ class MLP:
         self.biases = []
 
         # set weights as random values and biases as zeros
-        self.weights.append(np.random.randn(self.input_layer_size, self.num_neurons[0]))
+        self.weights.append(
+            np.random.randn(self.input_layer_size, self.num_neurons[0])
+            / np.sqrt(self.input_layer_size)
+        )
         self.biases.append(np.zeros(self.num_neurons[0]))
 
         for i in range(self.num_hidden_layers - 1):
             self.weights.append(
                 np.random.randn(self.num_neurons[i], self.num_neurons[i + 1])
+                / np.sqrt(self.num_neurons[i])
             )
             self.biases.append(np.zeros(self.num_neurons[i + 1]))
 
         self.weights.append(
             np.random.randn(self.num_neurons[-1], self.output_layer_size)
+            / np.sqrt(self.num_neurons[-1])
         )
         self.biases.append(np.zeros(self.output_layer_size))
 
@@ -254,8 +273,8 @@ class MLP:
 
         # compute gradients for weights and biases based on deltas
         for i in range(len(deltas)):
-            w_grads.append(np.dot(self.activations[i].T, deltas[i]))
-            b_grads.append(np.sum(deltas[i], axis=0))
+            w_grads.append(np.dot(self.activations[i].T, deltas[i]) / X.shape[0])
+            b_grads.append(np.mean(deltas[i], axis=0))
 
         return w_grads, b_grads
 
@@ -312,7 +331,7 @@ class MLP:
         # compute score
         return np.linalg.norm(grads - num_grads) / (np.linalg.norm(grads + num_grads))
 
-    def fit(self, X, y, early_stop=False, X_val=None, y_val=None):
+    def fit(self, X, y, early_stop=False, X_val=None, y_val=None, patience=5):
         """
         Fit the model to the data.
 
@@ -329,18 +348,17 @@ class MLP:
         y_val : numpy array
             The target output for validation. Default is None.
         """
-        self.train_losses = []
-        self.val_losses = []
+
         match self.optimizer:
             case "sgd":
                 self._gradient_descent_loop(
-                    X, y, X_val, y_val, early_stop, batch_size=1
+                    X, y, X_val, y_val, early_stop, patience, batch_size=1
                 )
             case "batch-gd":
-                self._gradient_descent_loop(X, y, X_val, y_val, early_stop)
+                self._gradient_descent_loop(X, y, X_val, y_val, early_stop, patience)
             case "minibatch-gd":
                 self._gradient_descent_loop(
-                    X, y, X_val, y_val, early_stop, batch_size=self.batch_size
+                    X, y, X_val, y_val, early_stop, patience, batch_size=self.batch_size
                 )
             case _:
                 raise ValueError(
@@ -361,11 +379,91 @@ class MLP:
             case "classification-single-label":
                 print(f"{phase} Accuracy: {self.metrics.accuracy(y, predictions)}")
             case "classification-multi-label":
-                print(f"{phase} Accuracy: {self.metrics.accuracy(y, predictions)}")
+                print(
+                    f"{phase} Accuracy: {self.metrics.multi_label_accuracy(y, predictions)}"
+                )
             case _:
                 raise ValueError(
                     "Invalid task specified. Available options are 'regression', 'classification-single-label', 'classification-multi-label'."
                 )
+        if self.log_wandb:
+            match self.task:
+                case "regression":
+                    wandb.log(
+                        {
+                            f"{phase}_cost": cost,
+                            f"{phase}_mse": self.metrics.mean_squared_error(
+                                y, predictions
+                            ),
+                            f"{phase}_rmse": self.metrics.root_mean_squared_error(
+                                y, predictions
+                            ),
+                            f"{phase}_r2": self.metrics.r2_score(y, predictions),
+                        }
+                    )
+                case "classification-single-label":
+                    wandb.log(
+                        {
+                            f"{phase}_cost": cost,
+                            f"{phase}_accuracy": self.metrics.accuracy(y, predictions),
+                            f"{phase}_f1": self.metrics.f1_score(y, predictions),
+                            f"{phase}_precision": self.metrics.precision(
+                                y, predictions
+                            ),
+                            f"{phase}_recall": self.metrics.recall(y, predictions),
+                        }
+                    )
+                case "classification-multi-label":
+                    wandb.log(
+                        {
+                            f"{phase}_cost": cost,
+                            f"{phase}_accuracy": self.metrics.multi_label_accuracy(
+                                y, predictions
+                            ),
+                            f"{phase}_f1": self.metrics.f1_score(y, predictions),
+                            f"{phase}_precision": self.metrics.precision(
+                                y, predictions
+                            ),
+                            f"{phase}_recall": self.metrics.recall(y, predictions),
+                            f"{phase}_hamming_loss": self.metrics.hamming_loss(
+                                y, predictions
+                            ),
+                        }
+                    )
+                case _:
+                    raise ValueError(
+                        "Invalid task specified. Available options are 'regression', 'classification-single-label', 'classification-multi-label'."
+                    )
+
+        if self.log_local and phase == "Validation":
+            match self.task:
+                case "regression":
+                    self.logs.append(
+                        {
+                            "loss": cost,
+                            "mse": self.metrics.mean_squared_error(y, predictions),
+                        }
+                    )
+                case "classification-single-label":
+                    self.logs.append(
+                        {
+                            "loss": cost,
+                            "accuracy": self.metrics.accuracy(y, predictions),
+                        }
+                    )
+                case "classification-multi-label":
+                    self.logs.append(
+                        {
+                            "loss": cost,
+                            "accuracy": self.metrics.multi_label_accuracy(
+                                y, predictions
+                            ),
+                        }
+                    )
+                case _:
+                    raise ValueError(
+                        "Invalid task specified. Available options are 'regression', 'classification-single-label', 'classification-multi-label'."
+                    )
 
         return cost
 
@@ -383,9 +481,11 @@ class MLP:
             )
         self._update_weights_and_biases(w_grads, b_grads)
 
-    def _gradient_descent_loop(self, X, y, X_val, y_val, early_stop, batch_size=None):
+    def _gradient_descent_loop(
+        self, X, y, X_val, y_val, early_stop, patience, batch_size=None
+    ):
         last_val_cost = np.inf
-        best_params = self.weights, self.biases
+        best_params = (self.weights.copy(), self.biases.copy())
         for e in range(self.epochs):
             if batch_size is not None:
                 # Shuffle data
@@ -400,20 +500,25 @@ class MLP:
             train_predictions = self.predict(X)
             print(f"Epoch {e+1}/{self.epochs}")
             train_cost = self._print_metrics(X, y, train_predictions, "Train")
-            self.train_losses.append(train_cost)
 
             if early_stop:
                 val_predictions = self.predict(X_val)
                 val_cost = self._print_metrics(
                     X_val, y_val, val_predictions, "Validation"
                 )
-                self.val_losses.append(val_cost)
+
                 stop, last_val_cost = self._check_early_stop(val_cost, last_val_cost)
                 if stop:
-                    self.weights, self.biases = best_params
+                    patience -= 1
+                else:
+                    best_params = self.weights, self.biases
+                if patience == 0:
                     break
+            else:
+                best_params = self.weights, self.biases
+        self.weights, self.biases = best_params
 
-    def predict(self, X, threshold=0.7):
+    def predict(self, X, threshold=0.5):
         """
         Predict the output for the given input.
 
@@ -436,7 +541,6 @@ class MLP:
                 res[np.arange(ypred.shape[0]), argmaxs] = 1
                 return res
             case "classification-multi-label":
-                print((ypred > threshold).astype(int))
                 return (ypred > threshold).astype(int)
             case "regression":
                 return ypred
@@ -445,14 +549,17 @@ class MLP:
                     "Invalid task specified. Available options are 'regression', 'classification-single-label', 'classification-multi-label'."
                 )
 
+
 class MLP_classification_single_label(MLP):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs, task="classification-single-label")
-        
+
+
 class MLP_classification_multi_label(MLP):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs, task="classification-multi-label")
-        
+
+
 class MLP_regression(MLP):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs, task="regression")

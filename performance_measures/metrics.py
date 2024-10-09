@@ -26,6 +26,24 @@ class Metrics:
             The accuracy of the model
         """
         return np.mean(np.all(y_true == y_pred, axis=1))
+    
+    def multi_label_accuracy(self, y_true, y_pred):
+        """
+        Calculate the multi-label accuracy of the model
+
+        Parameters
+        ----------
+        y_true : numpy.ndarray
+            The true target values
+        y_pred : numpy.ndarray
+            The predicted target values
+
+        Returns
+        -------
+        float
+            The multi-label accuracy of the model
+        """
+        return np.mean([np.sum(t == p) / len(t) for t, p in zip(y_true, y_pred)])
 
     def precision(self, y_true, y_pred, type="micro"):
         """
@@ -218,9 +236,9 @@ class Metrics:
         ss_res = np.sum((y_true - y_pred) ** 2)
         return 1 - (ss_res / ss_tot)
     
-    def hamming_distance(self, y_true, y_pred):
+    def hamming_loss(self, y_true, y_pred):
         """
-        Calculate the hamming distance of the model
+        Calculate the hamming loss of the model
 
         Parameters
         ----------
@@ -232,6 +250,6 @@ class Metrics:
         Returns
         -------
         float
-            The hamming distance of the model
+            The hamming loss of the model
         """
-        return np.mean(np.sum(y_true != y_pred, axis=1))
+        return np.sum(y_true != y_pred) / (y_true.shape[0] * y_true.shape[1])
