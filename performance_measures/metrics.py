@@ -25,6 +25,9 @@ class Metrics:
         float
             The accuracy of the model
         """
+        # return np.mean(y_true == y_pred)
+        if len(y_pred.shape) == 1 or len(y_true.shape) == 1:
+            return np.mean(y_true == y_pred)
         return np.mean(np.all(y_true == y_pred, axis=1))
     
     def multi_label_accuracy(self, y_true, y_pred):
@@ -160,6 +163,24 @@ class Metrics:
             The mean squared error of the model
         """
         return np.mean((y_true - y_pred) ** 2)
+    
+    def mean_absolute_error(self, y_true, y_pred):
+        """
+        Calculate the mean absolute error of the model
+
+        Parameters
+        ----------
+        y_true : numpy.ndarray
+            The true target values
+        y_pred : numpy.ndarray
+            The predicted target values
+
+        Returns
+        -------
+        float
+            The mean absolute error of the model
+        """
+        return np.mean(np.abs(y_true - y_pred))
 
     def standard_deviation(self, y_true, y_pred):
         """
@@ -253,3 +274,74 @@ class Metrics:
             The hamming loss of the model
         """
         return np.sum(y_true != y_pred) / (y_true.shape[0] * y_true.shape[1])
+    
+
+    def multi_label_precision(self, y_true, y_pred):
+        """
+        Calculate the multi-label precision of the model
+
+        Parameters
+        ----------
+        y_true : numpy.ndarray
+            The true target values
+        y_pred : numpy.ndarray
+            The predicted target values
+
+        Returns
+        -------
+        float
+            The multi-label precision of the model
+        """
+        precisions = []
+        for t, p in zip(y_true, y_pred):
+            tp = np.sum((t == 1) & (p == 1))
+            fp = np.sum((t == 0) & (p == 1))
+            precisions.append(tp / (tp + fp) if (tp + fp) > 0 else 0.0)
+        return np.mean(precisions)
+
+    def multi_label_recall(self, y_true, y_pred):
+        """
+        Calculate the multi-label recall of the model
+
+        Parameters
+        ----------
+        y_true : numpy.ndarray
+            The true target values
+        y_pred : numpy.ndarray
+            The predicted target values
+
+        Returns
+        -------
+        float
+            The multi-label recall of the model
+        """
+        recalls = []
+        for t, p in zip(y_true, y_pred):
+            tp = np.sum((t == 1) & (p == 1))
+            fn = np.sum((t == 1) & (p == 0))
+            recalls.append(tp / (tp + fn) if (tp + fn) > 0 else 0.0)
+        return np.mean(recalls)
+
+    def multi_label_f1(self, y_true, y_pred):
+        """
+        Calculate the multi-label F1 score of the model
+
+        Parameters
+        ----------
+        y_true : numpy.ndarray
+            The true target values
+        y_pred : numpy.ndarray
+            The predicted target values
+
+        Returns
+        -------
+        float
+            The multi-label F1 score of the model
+        """
+        precisions = [self.multi_label_precision([t], [p]) for t, p in zip(y_true, y_pred)]
+        recalls = [self.multi_label_recall([t], [p]) for t, p in zip(y_true, y_pred)]
+        f1_scores = [
+            (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+            for precision, recall in zip(precisions, recalls)
+        ]
+        return np.mean(f1_scores)

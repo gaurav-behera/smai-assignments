@@ -33,7 +33,7 @@ class MLP:
     log_local : bool
         Whether to log the metrics to a local variable. Default is False.
     task : str
-        The task to perform. Default is "regression". Available options are "regression", "classification-single-label", "classification-multi-label".
+        The task to perform. Default is "regression". Available options are "regression", "classification-single-label", "classification-multi-label", "logistic-bce", "logistic-mse".
     """
 
     def __init__(
@@ -91,19 +91,34 @@ class MLP:
         match self.task:
             case "regression":
                 self._cost_function = self._mean_squared_error
+                self._cost_function_derivative = self._mean_squared_error_derivative
                 self._activation_output = self._linear
                 self._activation_derivative_output = self._linear_derivative
             case "classification-single-label":
                 self._cost_function = self._cross_entropy
+                self._cost_function_derivative = self._cross_entropy_derivative
+                # self._cost_function = self._mean_squared_error
+                # self._cost_function_derivative = self._mean_squared_error_derivative
                 self._activation_output = self._softmax
                 self._activation_derivative_output = self._softmax_derivative
             case "classification-multi-label":
                 self._cost_function = self._binary_cross_entropy
+                self._cost_function_derivative = self._binary_cross_entropy_derivative
+                self._activation_output = self._sigmoid
+                self._activation_derivative_output = self._sigmoid_derivative
+            case "logistic-bce":
+                self._cost_function = self._binary_cross_entropy
+                self._cost_function_derivative = self._binary_cross_entropy_derivative
+                self._activation_output = self._sigmoid
+                self._activation_derivative_output = self._sigmoid_derivative
+            case "logistic-mse":
+                self._cost_function = self._mean_squared_error
+                self._cost_function_derivative = self._mean_squared_error_derivative
                 self._activation_output = self._sigmoid
                 self._activation_derivative_output = self._sigmoid_derivative
             case _:
                 raise ValueError(
-                    "Invalid task specified. Available options are 'regression', 'classification-single-label', 'classification-multi-label'."
+                    "Invalid task specified. Available options are 'regression', 'classification-single-label', 'classification-multi-label', 'logistic-bce', 'logistic-mse'."
                 )
 
         if log_local:
@@ -126,8 +141,12 @@ class MLP:
         return x
 
     def _softmax(self, x):
-        x_exp = np.exp(x - np.max(x, axis=1, keepdims=True))  # for numerical stability
+        x = np.nan_to_num(x, nan=0.0, posinf=0.0, neginf=0.0)
+        # Subtract the maximum value for numerical stability
+        x_max = np.max(x, axis=1, keepdims=True)
+        x_exp = np.exp(x - x_max) 
         return x_exp / np.sum(x_exp, axis=1, keepdims=True)
+
 
     # activation function derivative
     def _relu_derivative(self, x):
@@ -142,9 +161,9 @@ class MLP:
     def _linear_derivative(self, x):
         return np.ones_like(x)
 
-    def _softmax_derivative(self, x):
-        s = self._softmax(x).reshape(-1, 1)
-        return np.diagflat(s) - np.dot(s, s.T)
+    def _softmax_derivative(self, x): # before softmax so doesn't really matter
+        return np.ones_like(x)
+
 
     # cost functions
     def _mean_squared_error(self, y_pred, y):
@@ -152,14 +171,25 @@ class MLP:
         return np.mean(np.square(diff, dtype=np.float64))
 
     def _cross_entropy(self, y_pred, y):
-        epsilon = 1e-4
-        y_pred = np.clip(y_pred, epsilon, 1.0 - epsilon)
-        return -np.sum(y * np.log(y_pred))
+        log_y_pred = np.where(y_pred > 0, np.log(y_pred), 0)
+        return -np.sum(y * log_y_pred)
 
     def _binary_cross_entropy(self, y_pred, y):
         epsilon = 1e-4
         y_pred = np.clip(y_pred, epsilon, 1.0 - epsilon)
         return -np.sum(y * np.log(y_pred) + (1 - y) * np.log(1 - y_pred))
+    
+    # cost derivatives
+    def _mean_squared_error_derivative(self, y_pred, y):
+        return 2*(y_pred - y)/y.shape[0]
+    
+    def _cross_entropy_derivative(self, y_pred, y): # before softmax
+        return (y_pred - y)
+    
+    def _binary_cross_entropy_derivative(self, y_pred, y):
+        epsilon = 1e-12
+        y_pred = np.clip(y_pred, epsilon, 1.0 - epsilon)
+        return -y/y_pred + (1 - y)/(1 - y_pred)
 
     # model initialization
     def _initialize_model(self):
@@ -232,12 +262,13 @@ class MLP:
         float
             The cost of the model.
         """
-        predictions = self.predict(X)
+        predictions = self.forward(X)
+        predictions = self._activation_output(predictions)
         return self._cost_function(predictions, y)
 
-    def cost_function_derivative(self, X, y):
+    def backpropagation(self, X, y):
         """
-        Compute the derivative of the cost function.
+        Perform back propagation to compute the gradients of the weights and biases.
 
         Parameters
         ----------
@@ -256,7 +287,8 @@ class MLP:
             The gradients of the biases.
         """
         predictions = self.forward(X)
-        delta = -(y - predictions)
+        predictions = self._activation_output(predictions)
+        delta = self._cost_function_derivative(predictions, y) * self._activation_derivative_output(predictions)
         # delta = -(y - predictions) * self._activation_derivative_output(predictions)
         deltas = [delta]
 
@@ -278,19 +310,25 @@ class MLP:
 
         return w_grads, b_grads
 
-    def numerical_cost_function_derivative(self, X, y, e=1e-4):
+    def numerical_backpropagation(self, X, y, e=1e-6):
         w_grads = []
         b_grads = []
 
+        def cost(X, y):
+            return self.cost_function(X, y) / X.shape[0]
+            # y_pred = self.forward(X)
+            # diff = np.subtract(y_pred, y, dtype=np.float64)
+            # return np.mean(np.square(diff, dtype=np.float64)) / 2
+        
         # numerical weights gradient
         for i in range(len(self.weights)):
             w_grad = np.zeros_like(self.weights[i])
             for j in range(self.weights[i].shape[0]):
                 for k in range(self.weights[i].shape[1]):
                     self.weights[i][j, k] += e
-                    c1 = self.cost_function(X, y)
+                    c1 = cost(X, y) 
                     self.weights[i][j, k] -= 2 * e
-                    c2 = self.cost_function(X, y)
+                    c2 = cost(X, y)
                     w_grad[j, k] = (c1 - c2) / (2 * e)
                     self.weights[i][j, k] += e
             w_grads.append(w_grad)
@@ -300,9 +338,9 @@ class MLP:
             b_grad = np.zeros_like(self.biases[i])
             for j in range(self.biases[i].shape[0]):
                 self.biases[i][j] += e
-                c1 = self.cost_function(X, y)
+                c1 = cost(X, y)
                 self.biases[i][j] -= 2 * e
-                c2 = self.cost_function(X, y)
+                c2 = cost(X, y)
                 b_grad[j] = (c1 - c2) / (2 * e)
                 self.biases[i][j] += e
             b_grads.append(b_grad)
@@ -310,8 +348,8 @@ class MLP:
         return w_grads, b_grads
 
     def check_gradients(self, X, y):
-        w_grads, b_grads = self.cost_function_derivative(X, y)
-        w_grads_num, b_grads_num = self.numerical_cost_function_derivative(X, y)
+        w_grads, b_grads = self.backpropagation(X, y)
+        w_grads_num, b_grads_num = self.numerical_backpropagation(X, y)
 
         # flatten out the gradients
         grads = np.array([])
@@ -329,7 +367,7 @@ class MLP:
             num_grads = np.concatenate((num_grads, b_grads_num[i].flatten()))
 
         # compute score
-        return np.linalg.norm(grads - num_grads) / (np.linalg.norm(grads + num_grads))
+        return np.linalg.norm(grads - num_grads) / (np.linalg.norm(grads) + np.linalg.norm(num_grads))
 
     def fit(self, X, y, early_stop=False, X_val=None, y_val=None, patience=5):
         """
@@ -382,9 +420,13 @@ class MLP:
                 print(
                     f"{phase} Accuracy: {self.metrics.multi_label_accuracy(y, predictions)}"
                 )
+            case "logistic-bce":
+                pass
+            case "logistic-mse":
+                pass
             case _:
                 raise ValueError(
-                    "Invalid task specified. Available options are 'regression', 'classification-single-label', 'classification-multi-label'."
+                    "Invalid task specified."
                 )
         if self.log_wandb:
             match self.task:
@@ -460,9 +502,21 @@ class MLP:
                             ),
                         }
                     )
+                case "logistic-bce":
+                    self.logs.append(
+                        {
+                            "loss": cost,
+                        }
+                    )
+                case "logistic-mse":
+                    self.logs.append(
+                        {
+                            "loss": cost,
+                        }
+                    )
                 case _:
                     raise ValueError(
-                        "Invalid task specified. Available options are 'regression', 'classification-single-label', 'classification-multi-label'."
+                        "Invalid task specified."
                     )
 
         return cost
@@ -474,9 +528,9 @@ class MLP:
 
     def _gradient_descent_step(self, X, y, batch_indices=None):
         if batch_indices is None:
-            w_grads, b_grads = self.cost_function_derivative(X, y)
+            w_grads, b_grads = self.backpropagation(X, y)
         else:
-            w_grads, b_grads = self.cost_function_derivative(
+            w_grads, b_grads = self.backpropagation(
                 X[batch_indices], y[batch_indices]
             )
         self._update_weights_and_biases(w_grads, b_grads)
@@ -543,6 +597,10 @@ class MLP:
             case "classification-multi-label":
                 return (ypred > threshold).astype(int)
             case "regression":
+                return ypred
+            case "logistic-bce":
+                return ypred
+            case "logistic-mse":
                 return ypred
             case _:
                 raise ValueError(
