@@ -1,13 +1,14 @@
 import argparse
 from mlp_classification import task_2_1, task_2_3, task_2_4, task_2_5, task_2_6, task_2_7
-from mlp_regression import task_3_1, task_3_3, task_3_4, task_3_5
+from mlp_regression import task_3_1, task_3_3, task_3_4, task_3_5, task_3_6
+from mlp_autoencoder import task_autoencoder, task_4_4
 
 def main():
     parser = argparse.ArgumentParser(description="Driver for Assignment 3.")
     parser.add_argument(
         "--task",
         type=str,
-        choices=["2.1", "2.3", "2.4", "2.5", "2.6","2.7", "3.1", "3.3", "3.4", "3.5"],
+        choices=["2.1", "2.3", "2.4", "2.5", "2.6","2.7", "3.1", "3.3", "3.4", "3.5", "3.6", "4","4.4"],
         required=True,
         help="Enter the task to run.",
     )
@@ -54,6 +55,18 @@ def main():
             print("Running task 3.5...")
             task_3_5()
             print("Task 3.5 completed.")
+        case "3.6":
+            print("Running task 3.6...")
+            task_3_6()
+            print("Task 3.6 completed.")
+        case "4":
+            print("Running task 4...")
+            task_autoencoder()
+            print("Task 4 completed.")
+        case "4.4":
+            print("Running task 4.4...")
+            task_4_4()
+            print("Task 4.4 completed.")
         case _:
             print("Invalid task specified.")
             exit(1)
