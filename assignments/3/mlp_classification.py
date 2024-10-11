@@ -115,7 +115,7 @@ def task_2_3():
         "metric": {"name": "accuracy", "goal": "maximize"},
         "parameters": {
             "learning_rate": {"values": [0.01, 0.1]},
-            "activation_function": {"values": ["relu", "sigmoid", "tanh", "linear"]},
+            "activation_function": {"values": ["relu", "sigmoid", "tanh"]},
             "optimizer": {"values": ["sgd", "batch-gd", "minibatch-gd"]},
             "num_neurons": {
                 "values": [
@@ -188,6 +188,7 @@ def task_2_4():
         num_hidden_layers=best_params["num_hidden_layers"],
         num_neurons=best_params["num_neurons"],
         epochs=best_params["epochs"],
+        batch_size=best_params["batch_size"],
         input_layer_size=trainX.shape[1],
         output_layer_size=trainY.shape[1],
     )
