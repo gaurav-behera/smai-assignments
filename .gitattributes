@@ -1,0 +1,2 @@
+data/external/fashion_mnist/fashion-mnist_train.csv filter=lfs diff=lfs merge=lfs -text
+data/processed/fashion_mnist/train.csv filter=lfs diff=lfs merge=lfs -text
