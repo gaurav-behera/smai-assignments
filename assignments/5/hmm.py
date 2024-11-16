@@ -17,6 +17,7 @@ def get_mfccs(file_path):
 
 # plot mfccs heatmap
 def task_3_2():
+    # george
     fig = make_subplots(rows=5, cols=2, subplot_titles=[f'Digit {i}' for i in range(10)])
     for i in range(5):
         for j in range(2):
@@ -30,6 +31,20 @@ def task_3_2():
             fig.update_yaxes(title_text='Time', row=i + 1, col=j + 1)
             
     fig.update_layout(width=800, height=1200, title="MFCC for all digits (george_0)")
+    fig.show()
+    
+    for i in range(5):
+        for j in range(2):
+            mfccs = get_mfccs(f"../../data/external/recordings/{i*2+j}_jackson_0.wav")
+            fig.add_trace(
+                go.Heatmap(z=mfccs, zmax=300, zmin=-700, showscale=(i == 0 and j == 0)),
+                row=i + 1,
+                col=j + 1,
+            )
+            fig.update_xaxes(title_text='MFCC', row=i + 1, col=j + 1)
+            fig.update_yaxes(title_text='Time', row=i + 1, col=j + 1)
+            
+    fig.update_layout(width=800, height=1200, title="MFCC for all digits (jackson_0)")
     fig.show()
     
 def task_3_4():
